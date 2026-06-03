@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bag of Utils</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="app-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="6" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 6V4C9 3.44772 9.44772 3 10 3H14C14.5523 3 15 3.44772 15 4V6" stroke="currentColor" stroke-width="2"/>
+            <circle cx="9" cy="13" r="1.5" fill="currentColor"/>
+            <circle cx="15" cy="13" r="1.5" fill="currentColor"/>
+            <path d="M12 11V15M10 13H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="app-name">Bag of Utils</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" id="nav-renamer">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-label">File Renamer</span>
+        </a>
+        <div class="nav-separator">Other Utilities</div>
+        <a href="#" class="nav-item disabled" title="Coming Soon">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-label">Image Optimizer</span>
+          <span class="badge">Soon</span>
+        </a>
+        <a href="#" class="nav-item disabled" title="Coming Soon">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke-linecap="round"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" stroke-linecap="round"/>
+            <line x1="12" y1="22.08" x2="12" y2="12" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-label">Archive Packager</span>
+          <span class="badge">Soon</span>
+        </a>
+        <a href="#" class="nav-item disabled" title="Coming Soon">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke-linecap="round"/>
+            <path d="M6 8h12M6 12h12M6 16h8" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-label">Text Formatter</span>
+          <span class="badge">Soon</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="version">v1.0.0</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Title bar header for window dragging (matches macOS borderless window behavior) -->
+      <header class="window-header">
+        <div class="window-drag-region"></div>
+        <div class="window-title">File Renamer</div>
+      </header>
+
+      <!-- Content Panel -->
+      <section class="panel-content">
+        <!-- Directory Selector Card -->
+        <div class="card glass">
+          <h2 class="card-title">1. Select Target Directory</h2>
+          <div class="directory-picker-row">
+            <input type="text" id="directory-path" readonly placeholder="No directory selected" aria-label="Selected Directory Path">
+            <button class="btn btn-secondary" id="btn-browse">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              Browse...
+            </button>
+          </div>
+        </div>
+
+        <!-- Renaming Configuration Card -->
+        <div class="card glass disabled" id="config-card">
+          <h2 class="card-title">2. Configure Renaming Options</h2>
+          <div class="config-grid">
+            <!-- Prefix Input -->
+            <div class="form-group">
+              <label for="prefix-input">Name Prefix</label>
+              <input type="text" id="prefix-input" placeholder="e.g. Vacation_2026" disabled>
+              <span class="input-hint">Filename prefixes cannot contain / or :</span>
+            </div>
+
+            <!-- Formatting Selection -->
+            <div class="form-group">
+              <label for="format-select">Naming Format</label>
+              <select id="format-select" disabled>
+                <option value="prefix_number">Prefix_001.ext (Sequential)</option>
+                <option value="prefix_dash_number">Prefix-001.ext (Sequential)</option>
+                <option value="prefix_space_number">Prefix 001.ext (Sequential)</option>
+                <option value="prefix_original">Prefix_OriginalName.ext</option>
+              </select>
+            </div>
+
+            <!-- Starting Index -->
+            <div class="form-group number-option">
+              <label for="index-input">Start Index</label>
+              <input type="number" id="index-input" value="1" min="0" disabled>
+            </div>
+
+            <!-- Zero Padding -->
+            <div class="form-group number-option">
+              <label for="padding-input">Digits Padding</label>
+              <input type="number" id="padding-input" value="3" min="1" max="8" disabled>
+              <span class="input-hint">e.g. 3 = '001', 2 = '01'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Preview Card -->
+        <div class="card glass flex-fill preview-card">
+          <div class="preview-header">
+            <h2 class="card-title">3. Live Preview</h2>
+            <span class="file-count-badge" id="file-count">0 Files</span>
+          </div>
+
+          <div class="preview-container">
+            <!-- Empty state -->
+            <div class="empty-state" id="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+                <line x1="9" y1="19" x2="13" y2="19"/>
+              </svg>
+              <p>Please select a directory to preview files and configure renaming.</p>
+            </div>
+
+            <!-- Preview Table -->
+            <div class="table-wrapper hidden" id="table-wrapper">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Original Name</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Destination Name</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-tbody">
+                  <!-- JS generated list goes here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Execution and Feedback Footer -->
+        <div class="execution-footer glass hidden" id="execution-footer">
+          <div class="stats-box">
+            <span class="stat-label">Action:</span>
+            <span class="stat-value" id="stats-summary">Ready to rename 0 files</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-secondary hidden" id="btn-reveal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Show in Finder
+            </button>
+            <button class="btn btn-primary" id="btn-rename" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Rename Files
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Overlay Alerts System -->
+    <div class="alert-container" id="alert-container"></div>
+  </div>
+
+  <!-- Load Scripts -->
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>

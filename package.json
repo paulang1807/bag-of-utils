@@ -1,0 +1,17 @@
+{
+  "name": "bag-of-utils",
+  "version": "1.0.0",
+  "description": "A collection of native macOS utility applications starting with a file renamer",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "build": "./build.sh"
+  },
+  "keywords": [
+    "utility",
+    "macos",
+    "renamer"
+  ],
+  "author": "Paul S",
+  "license": "MIT"
+}
