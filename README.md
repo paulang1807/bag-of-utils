@@ -1,15 +1,15 @@
-# <img src="docs/app-icon.png" width="48" align="center" alt="Bag of Utils Icon"> Bag of Utils
+# <img src="./docs/app-icon.png" width="48" align="center" alt="Bag of Utils Icon"> Bag of Utils
 
 **Bag of Utils** is a modular, high-performance macOS utility application suite. Engineered to be ultra-lightweight and visually stunning, it brings native-grade desktop tools directly to your Mac.
 
-The suite starts with a robust, visual **File Renamer** utility, designed to handle bulk file renaming tasks safely and efficiently.
+The suite currently includes a robust, visual **File Renamer** for bulk renaming and a **Document Converter** for converting between PDF, EPUB, DjVu, DOCX, HTML, TXT, RTF and Markdown.
 
 ---
 
 ## 📸 Media Demonstration
 
 ### Application Interface Mockup
-![Bag of Utils User Interface](docs/ui-screenshot.png)
+![Bag of Utils User Interface](./docs/ui-screenshot.png)
 
 ---
 
@@ -23,13 +23,30 @@ The suite starts with a robust, visual **File Renamer** utility, designed to han
 
 ---
 
+## 🔄 Key Features (Document Converter)
+
+* **Many Formats**: Bidirectional conversion between **PDF**, **EPUB**, **DjVu**, **DOCX**, **HTML**, **TXT**, **RTF**, and **Markdown**.
+* **Files or Folders**: Pick individual files or a whole folder; optionally choose a separate output folder.
+* **Safe Queue Preview**: See every output name and status before converting. Choose **Auto-rename**, **Skip** or **Overwrite** when an output already exists. Duplicate outputs within a batch are flagged.
+* **Hybrid Engine**: Works out of the box using built-in macOS tools (`textutil`, PDFKit, CoreText, `zip`/`unzip`). If [Calibre](https://calibre-ebook.com/) is installed, it is used automatically for higher-fidelity PDF/EPUB/DOCX/HTML/TXT/RTF conversions, with a fallback to the built-in engine.
+* **Atomic Output**: Files are written to a temporary location first, so a failed conversion never leaves a partial file.
+* **Self-Contained DjVu Engine**: Full reading and writing support for DjVu (`.djvu`) is 100% self-contained in native Swift with **zero external CLI dependencies** (no Homebrew, no `djvutxt`, and no `pdf2djvu` needed).
+  - **Embedded Text Extraction**: Extracts text directly from native `TXTz` (BZZ-compressed) and `TXTa` chunks across single-page and multi-page (`DJVM`) documents.
+  - **Vision OCR Fallback**: Scanned or image-only DjVu pages automatically fall back to Apple's built-in macOS Vision framework (`VNRecognizeTextRequest`) to extract text and layout.
+  - **Bilevel JB2 Generation**: Writes valid, standard-compliant DjVu documents with compressed bilevel JB2 page masks and embedded searchable text layers.
+* **Optional Fidelity Boosters**: If [Calibre](https://calibre-ebook.com/) is installed, it is auto-detected and used for enhanced fidelity when converting between ebook formats, otherwise falling back smoothly to the native engine.
+
+---
+
 ## 🛠 Tech Stack
 
-* **Native Wrapper & Shell**: Swift (AppKit & WebKit frameworks)
-* **User Interface**: HTML5, Vanilla CSS3 (Glassmorphic theme), ES6 JavaScript
-* **IPC communication**: Asynchronous Promise-based WebKit Script Bridge
+* **Native Wrapper & Shell**: Swift 5 (AppKit & WebKit frameworks)
+* **Document Engine & OCR**: PDFKit, CoreText, CoreGraphics, and Apple Vision framework (`VNRecognizeTextRequest`)
+* **Self-Contained Codecs**: Pure Swift ZP-coder arithmetic compression, BZZ (Burrows-Wheeler Transform + MTF), and JB2 bilevel image encoding/decoding
+* **User Interface**: HTML5, Vanilla CSS3 (Glassmorphic theme with macOS vibrancy), ES6 JavaScript
+* **IPC Communication**: Asynchronous Promise-based WebKit Script Message Bridge
 * **Unit Testing**: Node.js Native Test Runner (`node --test`)
-* **Assets compilation**: macOS `sips` (Scriptable Image Processing System) and `iconutil`
+* **Assets & Bundle Compilation**: macOS `sips` (Scriptable Image Processing System) and `iconutil`
 
 ---
 
@@ -85,26 +102,42 @@ npm test
 4. **Execute**: When you are satisfied with the preview (and no conflicts exist), click **Rename Files**. The files will be renamed in-place and the preview list will refresh automatically.
 5. **Quick Reveal**: Click **Show in Finder** at any point to open the folder and verify the changes on disk.
 
+### Document Converter
+
+1. Choose **Document Converter** in the sidebar.
+2. Click **Select Files...** (one or more documents) or **Select Folder...** (all supported documents in a folder). Optionally set an **Output Folder...**; by default outputs are written next to their sources.
+3. Choose the **Convert To** format, an optional **Source Filter**, and what to do **If Output Exists**.
+4. Review the **Conversion Queue**. Rows show the output name and a status (Ready, Already target format, Will skip, Conflict).
+5. Click **Convert Documents**. Per-file results (including failure reasons on hover) appear in the queue.
+
 ---
 
 ## 📂 Project Structure
 
 ```
 bag-of-utils/
-├── build.sh            # Packages Resources & compiles App binary
-├── package.json        # Project metadata, ES Modules setup, npm scripts
-├── Info.plist          # macOS App Bundle property list configuration
-├── docs/               # Documentation images & media assets
-│   ├── app-icon.png
-│   └── ui-screenshot.png
+├── build.sh                 # Packages Resources, iconset & compiles App binary
+├── package.json             # Project metadata, ES Modules setup, npm scripts
+├── Info.plist               # macOS App Bundle property list configuration
+├── docs/                    # Documentation images & media assets
+│   ├── app-icon.png         # High-resolution master application icon
+│   └── ui-screenshot.png    # Interface screenshot
 ├── src/
 │   ├── swift/
-│   │   └── main.swift  # Native window controls & script IPC bridge
-│   └── web/            # HTML/CSS/JS frontend
-│       ├── index.html
-│       ├── style.css
-│       ├── renamer.js  # Main renaming logic module
-│       └── renderer.js # UI event controllers
+│   │   ├── main.swift           # Native window controls & script IPC bridge
+│   │   ├── converter.swift      # Multi-format conversion coordinator
+│   │   ├── djvu_tables.swift    # ZP arithmetic coder probability tables
+│   │   ├── djvu_codec.swift     # Pure Swift ZP and BZZ compression codecs
+│   │   ├── djvu_jb2.swift       # Pure Swift JB2 bi-level image & symbol codec
+│   │   └── djvu_document.swift  # IFF85/DJVM parser, OCR fallback & DjVu writer
+│   └── web/                     # HTML/CSS/JS frontend
+│       ├── index.html           # Main application view layout
+│       ├── style.css            # Glassmorphism styling and themes
+│       ├── renamer.js           # File renamer preview and pattern engine
+│       ├── renderer.js          # Renamer UI event controller & IPC bridge
+│       ├── converter.js         # Document converter format detection & queue preview
+│       └── converter-ui.js      # Document converter UI event controller
 └── test/
-    └── renamer.test.js # Native Node.js tests suite
+    ├── renamer.test.js          # Unit tests for renaming patterns & conflict detection
+    └── converter.test.js        # Unit tests for format detection & conversion preview
 ```
