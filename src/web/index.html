@@ -30,6 +30,15 @@
           </svg>
           <span class="nav-label">File Renamer</span>
         </a>
+        <a href="#" class="nav-item" id="nav-converter">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round"/>
+            <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-label">Document Converter</span>
+        </a>
         <div class="nav-separator">Other Utilities</div>
         <a href="#" class="nav-item disabled" title="Coming Soon">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -68,11 +77,11 @@
       <!-- Title bar header for window dragging (matches macOS borderless window behavior) -->
       <header class="window-header">
         <div class="window-drag-region"></div>
-        <div class="window-title">File Renamer</div>
+        <div class="window-title" id="window-title">File Renamer</div>
       </header>
 
       <!-- Content Panel -->
-      <section class="panel-content">
+      <section class="panel-content" id="view-renamer" tabindex="-1">
         <!-- Directory Selector Card -->
         <div class="card glass">
           <h2 class="card-title">1. Select Target Directory</h2>
@@ -185,6 +194,97 @@
           </div>
         </div>
       </section>
+
+      <!-- Document Converter View -->
+      <section class="panel-content hidden" id="view-converter" aria-labelledby="converter-heading" tabindex="-1">
+        <h1 id="converter-heading" class="visually-hidden">Document Converter</h1>
+        <div class="card glass">
+          <h2 class="card-title">1. Select Documents</h2>
+          <div class="directory-picker-row">
+            <input type="text" id="conv-source-label" readonly placeholder="No documents selected" aria-label="Selected documents">
+            <button class="btn btn-secondary" id="conv-btn-files">Select Files...</button>
+            <button class="btn btn-secondary" id="conv-btn-folder">Select Folder...</button>
+          </div>
+          <div class="directory-picker-row conv-output-row">
+            <input type="text" id="conv-output-label" readonly value="Same folder as source" aria-label="Output folder">
+            <button class="btn btn-secondary" id="conv-btn-output">Output Folder...</button>
+            <button class="btn btn-secondary" id="conv-btn-output-reset">Reset</button>
+          </div>
+        </div>
+
+        <div class="card glass disabled" id="conv-config-card">
+          <h2 class="card-title">2. Conversion Options</h2>
+          <div class="config-grid">
+            <div class="form-group">
+              <label for="conv-target">Convert To</label>
+              <select id="conv-target" disabled>
+                <option value="pdf">PDF (.pdf)</option>
+                <option value="epub">EPUB (.epub)</option>
+                <option value="djvu">DjVu (.djvu)</option>
+                <option value="docx">Word (.docx)</option>
+                <option value="html">HTML (.html)</option>
+                <option value="txt">Plain Text (.txt)</option>
+                <option value="rtf">Rich Text (.rtf)</option>
+                <option value="md">Markdown (.md)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="conv-filter">Source Filter</label>
+              <select id="conv-filter" disabled>
+                <option value="all">All supported formats</option>
+                <option value="pdf">PDF only</option>
+                <option value="epub">EPUB only</option>
+                <option value="djvu">DjVu only</option>
+                <option value="docx">DOCX only</option>
+                <option value="html">HTML only</option>
+                <option value="txt">TXT only</option>
+                <option value="rtf">RTF only</option>
+                <option value="md">Markdown only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="conv-conflict">If Output Exists</label>
+              <select id="conv-conflict" disabled>
+                <option value="rename">Auto-rename (_converted)</option>
+                <option value="skip">Skip</option>
+                <option value="overwrite">Overwrite</option>
+              </select>
+            </div>
+          </div>
+          <span class="input-hint" id="conv-tools-hint"></span>
+        </div>
+
+        <div class="card glass flex-fill preview-card">
+          <div class="preview-header">
+            <h2 class="card-title">3. Conversion Queue</h2>
+            <span class="file-count-badge" id="conv-count">0 Files</span>
+          </div>
+          <div class="preview-container">
+            <div class="empty-state" id="conv-empty">
+              <p>Select documents or a folder to build a conversion queue.</p>
+            </div>
+            <div class="table-wrapper hidden" id="conv-table-wrapper">
+              <table class="preview-table">
+                <thead>
+                  <tr><th>Source</th><th>From</th><th>Size</th><th>Output</th><th>Status</th></tr>
+                </thead>
+                <tbody id="conv-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="execution-footer glass hidden" id="conv-footer">
+          <div class="stats-box">
+            <span class="stat-label">Action:</span>
+            <span class="stat-value" id="conv-summary">Ready to convert 0 files</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-secondary hidden" id="conv-btn-reveal">Show in Finder</button>
+            <button class="btn btn-primary" id="conv-btn-run" disabled>Convert Documents</button>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Overlay Alerts System -->
@@ -193,5 +293,6 @@
 
   <!-- Load Scripts -->
   <script type="module" src="renderer.js"></script>
+  <script type="module" src="converter-ui.js"></script>
 </body>
 </html>

@@ -63,6 +63,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("Failed to find main resource URL")
         }
         
+        if let icon = NSImage(named: "AppIcon") {
+            NSApp.applicationIconImage = icon
+        }
+        
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -103,6 +107,16 @@ class BridgeHandler: NSObject, WKScriptMessageHandler {
                 handleOpenInFinder(path: path, callbackId: callbackId)
             } else {
                 sendResponse(callbackId: callbackId, data: nil, error: "Missing path parameter")
+            }
+        case "selectFiles":
+            handleSelectFiles(callbackId: callbackId)
+        case "checkTools":
+            sendResponse(callbackId: callbackId, data: Tools.status(), error: nil)
+        case "executeConversion":
+            if let items = body["items"] as? [[String: String]] {
+                handleExecuteConversion(items: items, callbackId: callbackId)
+            } else {
+                sendResponse(callbackId: callbackId, data: nil, error: "Missing parameters for conversion operation")
             }
         default:
             sendResponse(callbackId: callbackId, data: nil, error: "Unsupported action: \(action)")
@@ -218,6 +232,60 @@ class BridgeHandler: NSObject, WKScriptMessageHandler {
         } else {
             let errorMsg = failures.joined(separator: " | ")
             sendResponse(callbackId: callbackId, data: ["renamedCount": renamedCount], error: errorMsg)
+        }
+    }
+    
+    private func handleSelectFiles(callbackId: String) {
+        DispatchQueue.main.async {
+            let panel = NSOpenPanel()
+            panel.canChooseDirectories = false
+            panel.canChooseFiles = true
+            panel.allowsMultipleSelection = true
+            panel.title = "Choose Documents to Convert"
+            panel.prompt = "Choose"
+            
+            guard panel.runModal() == .OK else {
+                self.sendResponse(callbackId: callbackId, data: nil, error: "Cancelled")
+                return
+            }
+            let files: [[String: Any]] = panel.urls.map { url in
+                let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
+                return [
+                    "name": url.lastPathComponent,
+                    "path": url.path,
+                    "directory": url.deletingLastPathComponent().path,
+                    "size": attrs?[.size] as? Int64 ?? 0,
+                    "isDirectory": false
+                ]
+            }
+            self.sendResponse(callbackId: callbackId, data: files, error: nil)
+        }
+    }
+    
+    private func handleExecuteConversion(items: [[String: String]], callbackId: String) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let engine = ConversionEngine()
+            var results: [[String: Any]] = []
+            var convertedCount = 0
+            
+            for item in items {
+                guard let source = item["sourcePath"], let target = item["targetPath"],
+                      let format = item["targetFormat"] else { continue }
+                do {
+                    let targetURL = URL(fileURLWithPath: target)
+                    try FileManager.default.createDirectory(
+                        at: targetURL.deletingLastPathComponent(),
+                        withIntermediateDirectories: true)
+                    try engine.convert(source: URL(fileURLWithPath: source), target: targetURL, targetFormat: format)
+                    convertedCount += 1
+                    results.append(["sourcePath": source, "ok": true])
+                } catch {
+                    results.append(["sourcePath": source, "ok": false, "error": error.localizedDescription])
+                }
+            }
+            self.sendResponse(callbackId: callbackId,
+                              data: ["convertedCount": convertedCount, "results": results],
+                              error: nil)
         }
     }
     

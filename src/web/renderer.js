@@ -35,6 +35,15 @@ window.Bridge = {
             ]);
           } else if (action === "executeRename") {
             resolve({ renamedCount: data.renames.length });
+          } else if (action === "selectFiles") {
+            resolve([{ name: "book.epub", path: "/mock/book.epub", directory: "/mock", size: 150000, isDirectory: false }]);
+          } else if (action === "checkTools") {
+            resolve({ calibre: false, djvulibre: false, pdf2djvu: false });
+          } else if (action === "executeConversion") {
+            resolve({
+              convertedCount: data.items.length,
+              results: data.items.map(i => ({ sourcePath: i.sourcePath, ok: true }))
+            });
           } else {
             resolve(true);
           }
@@ -80,7 +89,7 @@ const statsSummary = document.getElementById("stats-summary");
 const alertContainer = document.getElementById("alert-container");
 
 // --- Utility: Format File Size ---
-function formatBytes(bytes) {
+export function formatBytes(bytes) {
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
@@ -89,7 +98,7 @@ function formatBytes(bytes) {
 }
 
 // --- Toast Notifications System ---
-function showToast(title, message, type = "info") {
+export function showToast(title, message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `alert-toast ${type}`;
   

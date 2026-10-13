@@ -14,7 +14,7 @@ MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 WEB_DIR="$RESOURCES_DIR/web"
 SDK_PATH="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
-GEN_ICON_PATH="/Users/pauls/.gemini/antigravity-ide/brain/799610b7-1816-4ea7-b038-b437b8b87e69/bag_of_utils_icon_clean.png"
+GEN_ICON_PATH="$WORKSPACE_DIR/docs/app-icon.png"
 
 echo "1. Cleaning previous build structures..."
 rm -rf "$BUILD_DIR"
@@ -26,14 +26,16 @@ cp "$WORKSPACE_DIR/src/web/index.html" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/style.css" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/renamer.js" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/renderer.js" "$WEB_DIR/"
+cp "$WORKSPACE_DIR/src/web/converter.js" "$WEB_DIR/"
+cp "$WORKSPACE_DIR/src/web/converter-ui.js" "$WEB_DIR/"
 
 echo "3. Copying bundle metadata (Info.plist)..."
 cp "$WORKSPACE_DIR/Info.plist" "$CONTENTS_DIR/"
 
-# Generate application icon (.icns) if the generated high-resolution PNG is available
-if [ -f "$GEN_ICON_PATH" ]; then
+# Generate application icon (.icns) if the high-resolution PNG is available
+if [ -r "$GEN_ICON_PATH" ] && sips -g pixelWidth "$GEN_ICON_PATH" > /dev/null 2>&1; then
     echo "4. Generating native macOS .icns file from generated asset..."
-    ICONSET_DIR="$WORKSPACE_DIR/AppIcon.iconset"
+    ICONSET_DIR="$BUILD_DIR/AppIcon.iconset"
     mkdir -p "$ICONSET_DIR"
     
     # Resize to all macOS standard sizes using sips
@@ -55,13 +57,25 @@ if [ -f "$GEN_ICON_PATH" ]; then
     rm -rf "$ICONSET_DIR"
     echo "   AppIcon.icns successfully compiled and bundled."
 else
-    echo "4. Warning: High-res app icon asset not found. Skipping icon packaging..."
+    echo "4. Warning: High-res app icon asset not accessible. Skipping icon packaging..."
 fi
 
 echo "5. Compiling Swift app wrapper..."
-swiftc -sdk "$SDK_PATH" "$WORKSPACE_DIR/src/swift/main.swift" -o "$MACOS_DIR/BagOfUtils"
+mkdir -p "$BUILD_DIR/modcache"
+swiftc -sdk "$SDK_PATH" -module-cache-path "$BUILD_DIR/modcache" \
+    -framework Vision -framework CoreGraphics -framework PDFKit \
+    "$WORKSPACE_DIR/src/swift/main.swift" \
+    "$WORKSPACE_DIR/src/swift/converter.swift" \
+    "$WORKSPACE_DIR/src/swift/djvu_tables.swift" \
+    "$WORKSPACE_DIR/src/swift/djvu_codec.swift" \
+    "$WORKSPACE_DIR/src/swift/djvu_jb2.swift" \
+    "$WORKSPACE_DIR/src/swift/djvu_document.swift" \
+    -o "$MACOS_DIR/BagOfUtils"
 
 echo "6. Making binary executable..."
 chmod +x "$MACOS_DIR/BagOfUtils"
+
+echo "7. Refreshing app bundle metadata for LaunchServices..."
+touch "$APP_DIR"
 
 echo "=== Build Complete: build/BagOfUtils.app created successfully! ==="
