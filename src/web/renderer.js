@@ -44,6 +44,17 @@ window.Bridge = {
               convertedCount: data.items.length,
               results: data.items.map(i => ({ sourcePath: i.sourcePath, ok: true }))
             });
+          } else if (action === "fetchWebpage") {
+            resolve({
+              html: `<!DOCTYPE html><html><head><title>Mock Web Article</title><meta name="author" content="Jane Doe"></head><body><article><h1>Sample Article</h1><p>This is a mock web article for browser debugging.</p></article></body></html>`,
+              url: data.url
+            });
+          } else if (action === "saveFilePicker") {
+            resolve("/mock/user/Documents/" + (data.defaultName || "article.pdf"));
+          } else if (action === "generateWebpagePDF") {
+            resolve({ path: data.targetPath });
+          } else if (action === "readClipboard") {
+            resolve("https://example.com/article");
           } else {
             resolve(true);
           }

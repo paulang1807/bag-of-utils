@@ -41,36 +41,44 @@ let queue = [];
 let busy = false;
 
 // --- View switching (View Transitions API with graceful fallback) ---
-function showView(name) {
-  const isConverter = name === "converter";
-  viewConverter.classList.toggle("hidden", !isConverter);
-  viewRenamer.classList.toggle("hidden", isConverter);
-  navConverter.classList.toggle("active", isConverter);
-  navRenamer.classList.toggle("active", !isConverter);
-  windowTitle.textContent = isConverter ? "Document Converter" : "File Renamer";
+export function showAppView(name) {
+  const views = {
+    renamer: { el: $("view-renamer"), nav: $("nav-renamer"), title: "File Renamer" },
+    converter: { el: $("view-converter"), nav: $("nav-converter"), title: "Document Converter" },
+    "web-to-pdf": { el: $("view-web-to-pdf"), nav: $("nav-web-to-pdf"), title: "Web to PDF" }
+  };
+  for (const [key, config] of Object.entries(views)) {
+    if (!config.el || !config.nav) continue;
+    const isActive = key === name;
+    config.el.classList.toggle("hidden", !isActive);
+    config.nav.classList.toggle("active", isActive);
+    if (isActive) {
+      windowTitle.textContent = config.title;
+    }
+  }
 }
 
-function switchView(name) {
-  const target = name === "converter" ? viewConverter : viewRenamer;
+export function switchAppView(name) {
+  const target = $(`view-${name}`);
   if (!document.startViewTransition) {
-    showView(name);
-    target.focus();
+    showAppView(name);
+    target?.focus();
     return;
   }
-  const transition = document.startViewTransition(() => showView(name));
-  transition.finished.finally(() => target.focus());
+  const transition = document.startViewTransition(() => showAppView(name));
+  transition.finished.finally(() => target?.focus());
 }
 
 navConverter.addEventListener("click", (e) => {
   e.preventDefault();
   if (viewConverter.classList.contains("hidden")) {
-    switchView("converter");
+    switchAppView("converter");
     refreshToolHint();
   }
 });
 navRenamer.addEventListener("click", (e) => {
   e.preventDefault();
-  if (viewRenamer.classList.contains("hidden")) switchView("renamer");
+  if (viewRenamer.classList.contains("hidden")) switchAppView("renamer");
 });
 
 // --- Optional tool detection hint ---

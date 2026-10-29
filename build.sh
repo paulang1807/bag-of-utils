@@ -28,6 +28,8 @@ cp "$WORKSPACE_DIR/src/web/renamer.js" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/renderer.js" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/converter.js" "$WEB_DIR/"
 cp "$WORKSPACE_DIR/src/web/converter-ui.js" "$WEB_DIR/"
+cp "$WORKSPACE_DIR/src/web/web-extractor.js" "$WEB_DIR/"
+cp "$WORKSPACE_DIR/src/web/web-ui.js" "$WEB_DIR/"
 
 echo "3. Copying bundle metadata (Info.plist)..."
 cp "$WORKSPACE_DIR/Info.plist" "$CONTENTS_DIR/"

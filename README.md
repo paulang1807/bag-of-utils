@@ -2,7 +2,7 @@
 
 **Bag of Utils** is a modular, high-performance macOS utility application suite. Engineered to be ultra-lightweight and visually stunning, it brings native-grade desktop tools directly to your Mac.
 
-The suite currently includes a robust, visual **File Renamer** for bulk renaming and a **Document Converter** for converting between PDF, EPUB, DjVu, DOCX, HTML, TXT, RTF and Markdown.
+The suite currently includes a robust, visual **File Renamer** for bulk renaming, a **Document Converter** for converting between PDF, EPUB, DjVu, DOCX, HTML, TXT, RTF and Markdown, and a **Web to PDF** tool for downloading clean primary article content directly from web pages into high-fidelity PDFs.
 
 ---
 
@@ -35,6 +35,17 @@ The suite currently includes a robust, visual **File Renamer** for bulk renaming
   - **Vision OCR Fallback**: Scanned or image-only DjVu pages automatically fall back to Apple's built-in macOS Vision framework (`VNRecognizeTextRequest`) to extract text and layout.
   - **Bilevel JB2 Generation**: Writes valid, standard-compliant DjVu documents with compressed bilevel JB2 page masks and embedded searchable text layers.
 * **Optional Fidelity Boosters**: If [Calibre](https://calibre-ebook.com/) is installed, it is auto-detected and used for enhanced fidelity when converting between ebook formats, otherwise falling back smoothly to the native engine.
+
+---
+
+## 🌐 Key Features (Web to PDF)
+
+* **Intelligent Reader Extraction**: Automatically isolates the primary content, main article body, author byline, publication date, and lead/inline media, eliminating distracting navigation bars, sidebars, cookie notices, popups, and advertisements.
+* **Full Webpage Fallback Option**: Easily toggle between Reader Mode (primary content) and Full Page mode to capture complete web documents.
+* **Live Interactive Article Preview**: Inspect the formatted title, domain tag, metadata pills, word count, estimated reading time, and article typography before exporting.
+* **Native Vector PDF Output**: Generates crisp, selectable, searchable vector PDFs using macOS WebKit (`WKPDFConfiguration`) with custom typography and `@page` print layouts.
+* **Native macOS Save File Picker**: Integrates standard AppKit `NSSavePanel` initialized with a sanitized filename based on the extracted article title.
+* **Quick Reveal**: Instant **Show in Finder** integration to locate the generated PDF on disk.
 
 ---
 
@@ -110,6 +121,15 @@ npm test
 4. Review the **Conversion Queue**. Rows show the output name and a status (Ready, Already target format, Will skip, Conflict).
 5. Click **Convert Documents**. Per-file results (including failure reasons on hover) appear in the queue.
 
+### Web to PDF
+
+1. Choose **Web to PDF** in the sidebar.
+2. Enter or paste a webpage URL (e.g. `https://example.com/article`) and click **Fetch & Preview** (or press Enter).
+3. Review the extracted title, metadata, word count, reading time, and formatted article in the preview pane.
+4. Optionally adjust **Content Mode** (Reader vs Full Webpage) or **Paper Size** (A4 or US Letter).
+5. Click **Save as PDF...** to open the native macOS save dialog, choose your destination, and save.
+6. Click **Show in Finder** to reveal the completed document.
+
 ---
 
 ## 📂 Project Structure
@@ -124,7 +144,7 @@ bag-of-utils/
 │   └── ui-screenshot.png    # Interface screenshot
 ├── src/
 │   ├── swift/
-│   │   ├── main.swift           # Native window controls & script IPC bridge
+│   │   ├── main.swift           # Native window controls, URLSession fetch & PDF rendering bridge
 │   │   ├── converter.swift      # Multi-format conversion coordinator
 │   │   ├── djvu_tables.swift    # ZP arithmetic coder probability tables
 │   │   ├── djvu_codec.swift     # Pure Swift ZP and BZZ compression codecs
@@ -136,8 +156,11 @@ bag-of-utils/
 │       ├── renamer.js           # File renamer preview and pattern engine
 │       ├── renderer.js          # Renamer UI event controller & IPC bridge
 │       ├── converter.js         # Document converter format detection & queue preview
-│       └── converter-ui.js      # Document converter UI event controller
+│       ├── converter-ui.js      # Document converter UI event controller
+│       ├── web-extractor.js     # Webpage primary content & metadata extractor
+│       └── web-ui.js            # Web to PDF UI event controller
 └── test/
     ├── renamer.test.js          # Unit tests for renaming patterns & conflict detection
-    └── converter.test.js        # Unit tests for format detection & conversion preview
+    ├── converter.test.js        # Unit tests for format detection & conversion preview
+    └── web-extractor.test.js    # Unit tests for content extraction, sanitization & HTML building
 ```
